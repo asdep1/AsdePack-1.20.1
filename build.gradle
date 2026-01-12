@@ -23,6 +23,19 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
+def secretsFile = file("gradle-secrets.properties")
+def secrets = new Properties()
+
+if (secretsFile.exists()) {
+    secretsFile.withInputStream { secrets.load(it) }
+} else {
+    logger.lifecycle("⚠ secrets.properties not found, SFTP upload disabled")
+}
+
+secrets.each { key, value ->
+    ext[key.toString()] = value
+}
+
 // Define the shade configuration and link it to implementation
 configurations {
     shade
@@ -190,21 +203,18 @@ afterEvaluate {
 }
 
 tasks.register('uploadJarToPterodactyl') {
-    onlyIf { uploadJarToSFTP.toBoolean() }
+    onlyIf { project.hasProperty("uploadJarToSFTP") && uploadJarToSFTP.toBoolean() }
 
-    // Depends on the REOBFUSCATED shadow jar task
     dependsOn 'reobfShadowJar'
 
     doLast {
-        // Grab the file from shadowJar
         def jarFile = tasks.shadowJar.archiveFile.get().asFile
-
         println "Prepare to upload: ${jarFile.name}"
 
         SSHClient ssh = new SSHClient()
         ssh.addHostKeyVerifier(new PromiscuousVerifier())
-        ssh.connect(sftpHost as String, sftpPort as Integer)
-        ssh.authPassword(sftpUser, sftpPassword)
+        ssh.connect(sftpHost as String, (sftpPort as String).toInteger())
+        ssh.authPassword(sftpUser as String, sftpPassword as String)
 
         def sftp = ssh.newSFTPClient()
         sftp.put(jarFile.absolutePath, sftpPath + jarFile.name)
