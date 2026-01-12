@@ -1,10 +1,17 @@
-package fr.asdepack.client.gui;
+package fr.asdepack.gui;
 
+import fr.asdepack.Asdepack;
+import fr.asdepack.Kit;
+import fr.asdepack.KitCooldownManager;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
+import java.util.List;
 
 public class KitMenu extends BorderedMenu {
 
@@ -21,34 +28,38 @@ public class KitMenu extends BorderedMenu {
 
         this.page = page;
 
-//        List<String> items = Asdepack.KITMANAGER.getKitList();
-//
-//        int pageSize = USEABLE_SLOTS.length;
-//        int startIndex = page * pageSize;
-//
-//        for (int i = 0; i < pageSize; i++) {
-//            int globalIndex = startIndex + i;
-//
-//            if (globalIndex >= items.size()) {
-//                break;
-//            }
-//            String kitName = items.get(globalIndex);
-//            int slotId = USEABLE_SLOTS[i];
-////            container.setItem(slotId, new ItemStack(Items.NAME_TAG).setHoverName(Component.literal(items.get(globalIndex))));
-//            container.setItem(slotId, Asdepack.KITMANAGER.getKitIcon(items.get(globalIndex)).setHoverName(Component.literal(kitName)));
-//        }
-//
-//        if (items.size() > (page + 1) * pageSize) {
-//            container.setItem(50,
-//                    new ItemStack(Items.ARROW)
-//                            .setHoverName(Component.literal("Next page")));
-//        }
-//
-//        if (page > 0) {
-//            container.setItem(48,
-//                    new ItemStack(Items.ARROW)
-//                            .setHoverName(Component.literal("Last page")));
-//        }
+        List<Kit> items = Asdepack.KITMANAGER.getAllKits();
+
+        int pageSize = USEABLE_SLOTS.length;
+        int startIndex = page * pageSize;
+
+        for (int i = 0; i < pageSize; i++) {
+            int globalIndex = startIndex + i;
+
+            if (globalIndex >= items.size()) {
+                break;
+            }
+            String kitName = items.get(globalIndex).getName();
+            int slotId = USEABLE_SLOTS[i];
+//            container.setItem(slotId, new ItemStack(Items.NAME_TAG).setHoverName(Component.literal(items.get(globalIndex))));
+            ItemStack icon = items.get(globalIndex).getIcon().copy().setHoverName(Component.literal(kitName));
+            if (items.get(globalIndex).getCost() > 0) {
+                icon.getOrCreateTag().putBoolean("hasCost", true); // Optional flag or just use lore
+            }
+            container.setItem(slotId, icon);
+        }
+
+        if (items.size() > (page + 1) * pageSize) {
+            container.setItem(50,
+                    new ItemStack(Items.ARROW)
+                            .setHoverName(Component.literal("Next page")));
+        }
+
+        if (page > 0) {
+            container.setItem(48,
+                    new ItemStack(Items.ARROW)
+                            .setHoverName(Component.literal("Last page")));
+        }
     }
 
     private void nextPage() {
@@ -79,11 +90,32 @@ public class KitMenu extends BorderedMenu {
             return;
         }
 
-//        List<ItemStack> items = Asdepack.KITMANAGER.getKitFor(stack.getHoverName().getString());
-//        if (items == null) return;
-//        for (ItemStack item : items) {
-//            player.getInventory().placeItemBackInInventory(item);
-//        }
+        Kit kit = Asdepack.KITMANAGER.getKit(stack.getHoverName().getString());
+        if (kit == null) return;
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            switch (kit.canGive(serverPlayer)) {
+                case 0:
+                    for (ItemStack item : kit.getItems()) {
+                        player.getInventory().placeItemBackInInventory(item.copy());
+                    }
+                    Asdepack.VAULT_ADAPTER.withdraw(serverPlayer, kit.getCost());
+                    KitCooldownManager.markUsed(serverPlayer, kit);
+                    player.sendSystemMessage(Component.literal("§aKit reçu."));
+                    player.closeContainer();
+                    break;
+                case 1:
+                    player.sendSystemMessage(Component.literal("§cVous n'avez pas la permission."));
+                    break;
+                case 2:
+                    long remain = KitCooldownManager.getRemaining(serverPlayer, kit);
+                    player.sendSystemMessage(Component.literal("§cCooldown: " + remain + "s"));
+                    break;
+                case 3:
+                    player.sendSystemMessage(Component.literal("§cVous n'avez pas assez d'argent (§e" + kit.getCost() + "§c)."));
+                    break;
+            }
+        }
     }
 
     @Override

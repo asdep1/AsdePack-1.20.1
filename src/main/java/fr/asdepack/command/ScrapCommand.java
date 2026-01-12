@@ -29,6 +29,11 @@ public class ScrapCommand {
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null) return 0;
 
+        if (!Asdepack.WG_ADAPTER.isPlayerInRegion(player, "spawn")){
+            player.sendSystemMessage(Component.literal("Vous ne pouvez pas utiliser cette commande ici"));
+            return 0;
+        }
+
         player.openMenu(new SimpleMenuProvider(
                 ScrappingMenu::new,
                 Component.literal("Scrapper")

@@ -19,7 +19,7 @@ public class RTPConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path FILE =
-            FMLPaths.CONFIGDIR.get().resolve("tacznpcs_positions.json");
+            FMLPaths.CONFIGDIR.get().resolve("asdepack-server.json");
 
     public static Vec3 spawn = null;
     public static int spawnTimer = 15;

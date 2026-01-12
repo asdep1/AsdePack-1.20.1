@@ -2,6 +2,7 @@ package fr.asdepack.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import fr.asdepack.Asdepack;
 import fr.asdepack.RTPConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -71,12 +72,17 @@ public class RTPCommand {
     private static int teleport(CommandContext<CommandSourceStack> context) {
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null) return 0;
+        if (!Asdepack.WG_ADAPTER.isPlayerInRegion(player, "spawn")){
+            player.sendSystemMessage(Component.literal("Vous ne pouvez pas utiliser cette commande ici"));
+            return 0;
+        }
 
         Random rnd = new Random();
         int i = rnd.nextInt(RTPConfig.positions.size());
         Vec3 teleportPos = RTPConfig.positions.get(i);
-
-        WaitingManager.start(player, RTPConfig.rtpTimer, p -> {
+        int timer = RTPConfig.rtpTimer;
+        if (player.isCreative()) timer = 0;
+        WaitingManager.start(player, timer, p -> {
             p.sendSystemMessage(Component.literal("Téléportation"));
             p.teleportTo(teleportPos.x(), teleportPos.y(), teleportPos.z());
         });
