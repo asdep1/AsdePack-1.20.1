@@ -2,9 +2,8 @@ package fr.asdepack.command;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.ModList;
 
 public class PermissionUtil {
 
@@ -12,27 +11,28 @@ public class PermissionUtil {
 
     public static void init() {
         try {
-            luckPerms = LuckPermsProvider.get();
-        } catch (Exception e) {
+            if (ModList.get().isLoaded("luckperms")) {
+                System.out.println("[Asdepack] Permission API disponible.");
+                luckPerms = LuckPermsProvider.get();
+            } else {
+                System.out.println("[Asdepack] Permission API indisponible.");
+            }
+        } catch (IllegalStateException e) {
             luckPerms = null;
+            System.out.println("[Asdepack] Permission API indisponible.");
         }
     }
 
     public static boolean hasPermission(ServerPlayer player, String node) {
-        if (FMLEnvironment.production) {
-            if (player.hasPermissions(4)) return true;
-            if (luckPerms == null) {
-                player.sendSystemMessage(Component.literal("§cPermission API non disponible. Veuillez contacter un administrateur."));
-                return false;
-            }
-
-            return luckPerms
-                    .getPlayerAdapter(ServerPlayer.class)
-                    .getPermissionData(player)
-                    .checkPermission(node)
-                    .asBoolean();
-        } else {
-            return player.hasPermissions(4);
+        if (player.hasPermissions(4)) return true;
+        if (luckPerms == null) {
+            return false;
         }
+
+        return luckPerms
+                .getPlayerAdapter(ServerPlayer.class)
+                .getPermissionData(player)
+                .checkPermission(node)
+                .asBoolean();
     }
 }
