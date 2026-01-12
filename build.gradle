@@ -122,7 +122,6 @@ dependencies {
 
     shade 'com.j256.ormlite:ormlite-core:6.1'
     shade 'com.j256.ormlite:ormlite-jdbc:6.1'
-    shade 'org.xerial:sqlite-jdbc:3.41.2.2'
 }
 
 tasks.named('processResources', ProcessResources).configure {
