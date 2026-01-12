@@ -1,5 +1,6 @@
 package fr.asdepack;
 
+import fr.asdepack.types.Kit;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;

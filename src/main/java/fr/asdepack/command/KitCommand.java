@@ -1,16 +1,18 @@
 package fr.asdepack.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import fr.asdepack.client.gui.KitMenu;
 import fr.asdepack.server.Server;
 import fr.asdepack.types.Kit;
+import lombok.SneakyThrows;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 
 import java.sql.SQLException;
 
@@ -74,12 +76,24 @@ public class KitCommand {
         );
     }
 
+    @SneakyThrows
     private static int openMenu(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
 
         player.openMenu(new SimpleMenuProvider(
-                KitMenu::new,
+                (int pContainerId, Inventory pPlayerInventory, Player pPlayer) -> {
+                    try {
+                        return new KitMenu(
+                                pContainerId,
+                                pPlayerInventory,
+                                pPlayer,
+                                0
+                        );
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
                 Component.literal("Kit list")
         ));
 

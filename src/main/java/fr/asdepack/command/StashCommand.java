@@ -3,7 +3,7 @@ package fr.asdepack.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import fr.asdepack.Asdepack;
-import fr.asdepack.gui.StashMenu;
+import fr.asdepack.client.gui.StashMenu;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;

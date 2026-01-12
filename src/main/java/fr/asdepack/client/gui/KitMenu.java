@@ -1,8 +1,10 @@
-package fr.asdepack.gui;
+package fr.asdepack.client.gui;
 
 import fr.asdepack.Asdepack;
-import fr.asdepack.Kit;
 import fr.asdepack.KitCooldownManager;
+import fr.asdepack.client.gui.BorderedMenu;
+import fr.asdepack.server.Server;
+import fr.asdepack.types.Kit;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -11,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class KitMenu extends BorderedMenu {
@@ -19,16 +22,16 @@ public class KitMenu extends BorderedMenu {
     private static final int[] PLACEABLESLOT = {};
     private final int page;
 
-    public KitMenu(int id, Inventory playerInv, Player player) {
+    public KitMenu(int id, Inventory playerInv, Player player) throws SQLException {
         this(id, playerInv, player, 0);
     }
 
-    public KitMenu(int id, Inventory playerInv, Player player, int page) {
+    public KitMenu(int id, Inventory playerInv, Player player, int page) throws SQLException {
         super(id, playerInv, player, TAKEABLESLOT, PLACEABLESLOT);
 
         this.page = page;
 
-        List<Kit> items = Asdepack.KITMANAGER.getAllKits();
+        List<Kit> items = Server.getDatabaseManager().getKitManager().getKits();
 
         int pageSize = USEABLE_SLOTS.length;
         int startIndex = page * pageSize;
@@ -64,14 +67,26 @@ public class KitMenu extends BorderedMenu {
 
     private void nextPage() {
         this.player.openMenu(new SimpleMenuProvider(
-                (id, inv, p) -> new KitMenu(id, inv, p, this.page + 1),
+                (id, inv, p) -> {
+                    try {
+                        return new KitMenu(id, inv, p, this.page + 1);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
                 Component.literal("Kit list")
         ));
     }
 
     private void lastPage() {
         this.player.openMenu(new SimpleMenuProvider(
-                (id, inv, p) -> new KitMenu(id, inv, p, this.page - 1),
+                (id, inv, p) -> {
+                    try {
+                        return new KitMenu(id, inv, p, this.page - 1);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
                 Component.literal("Kit list")
         ));
     }
@@ -90,7 +105,8 @@ public class KitMenu extends BorderedMenu {
             return;
         }
 
-        Kit kit = Asdepack.KITMANAGER.getKit(stack.getHoverName().getString());
+        Kit kit =  Server.getDatabaseManager().getKitManager().getKitByName(stack.getHoverName().getString());
+//        Kit kit = Asdepack.KITMANAGER.getKit(stack.getHoverName().getString());
         if (kit == null) return;
 
         if (player instanceof ServerPlayer serverPlayer) {

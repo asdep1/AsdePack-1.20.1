@@ -35,7 +35,7 @@ public class Asdepack {
     }
 
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
+    public void onServerStarting(ServerStartingEvent event) throws SQLException {
         if(FMLEnvironment.production) {
             PermissionUtil.init();
         }
