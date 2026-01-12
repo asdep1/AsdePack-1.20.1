@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Kit {
-    @DatabaseField(id = true)
+    @DatabaseField(generatedId = true)
     @Getter
     @Setter
     private int id;
