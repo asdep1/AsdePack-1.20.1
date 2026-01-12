@@ -119,6 +119,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    shade 'com.j256.ormlite:ormlite-core:6.1'
+    shade 'com.j256.ormlite:ormlite-jdbc:6.1'
+    shade 'org.xerial:sqlite-jdbc:3.41.2.2'
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -161,9 +165,11 @@ reobf {
 
 // Configure the Shadow task
 tasks.named('shadowJar', ShadowJar).configure {
-    archiveClassifier = ''
+    archiveClassifier = 'all'
     configurations = [project.configurations.shade]
-    relocate 'com.j256.ormlite', "${project.group}.shadow.ormlite"
+    relocate 'com.j256.ormlite', "${project.group}.${mod_id}.shadow.ormlite"
+    relocate 'org.xerial', "${project.group}.${mod_id}.shadow.xerial"
+    relocate 'org.sqlite', "${project.group}.${mod_id}.shadow.sqlite"
 }
 
 // --- FIX: Use afterEvaluate to prevent "Task not found" errors ---
