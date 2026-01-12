@@ -2,10 +2,8 @@ package fr.asdepack;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -24,103 +22,77 @@ public class KitManager {
 
     private void initDatabase() throws SQLException {
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(
-                    "CREATE TABLE IF NOT EXISTS kits (" +
-                            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "name TEXT UNIQUE NOT NULL," +
-                            "icon TEXT NOT NULL," +
-                            "kit TEXT NOT NULL" +
-                            ")"
-            );
+            stmt.executeUpdate("""
+                        CREATE TABLE IF NOT EXISTS kits (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            name TEXT UNIQUE NOT NULL,
+                            icon TEXT NOT NULL,
+                            items TEXT NOT NULL,
+                            cost INTEGER NOT NULL,
+                            permission TEXT,
+                            cooldown INTEGER NOT NULL
+                        )
+                    """);
         }
     }
 
-    public List<String> getKitList() {
-        List<String> result = new ArrayList<>();
+    public Kit getKit(String name) {
+        try (PreparedStatement ps = connection.prepareStatement("""
+                    SELECT * FROM kits WHERE name = ?
+                """)) {
+            ps.setString(1, name);
+            ResultSet rs = ps.executeQuery();
 
-        try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT name FROM kits ORDER BY id ASC"
-        )) {
+            if (!rs.next()) return null;
+
+            return fromResultSet(rs);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<Kit> getAllKits() {
+        List<Kit> kits = new ArrayList<>();
+
+        try (PreparedStatement ps = connection.prepareStatement("""
+                    SELECT * FROM kits ORDER BY id ASC
+                """)) {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                result.add(rs.getString("name"));
+                kits.add(fromResultSet(rs));
             }
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return result;
+        return kits;
     }
 
-    public ItemStack getKitIcon(String name) {
-        try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT icon FROM kits WHERE name = ?"
-        )) {
-            ps.setString(1, name);
-            ResultSet rs = ps.executeQuery();
+    public boolean saveKit(Kit kit) {
+        try (PreparedStatement ps = connection.prepareStatement("""
+                    INSERT OR REPLACE INTO kits(name, icon, items, cost, permission, cooldown)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """)) {
 
-            if (!rs.next()) return new ItemStack(Items.CHEST);
+            ps.setString(1, kit.getName());
+            ps.setString(2, GSON.toJson(ItemStackJson.toJson(kit.getIcon())));
+            ps.setString(3, serializeItems(kit.getItems()));
+            ps.setInt(4, kit.getCost());
+            ps.setString(5, kit.getPermission());
+            ps.setInt(6, kit.getCooldown());
 
-            return ItemStackJson.fromJson(
-                    JsonParser.parseString(rs.getString("icon")).getAsJsonObject()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ItemStack(Items.CHEST);
-        }
-    }
-
-    public List<ItemStack> getKitFor(String name) {
-        try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT kit FROM kits WHERE name = ?"
-        )) {
-            ps.setString(1, name);
-            ResultSet rs = ps.executeQuery();
-
-            if (!rs.next()) return List.of();
-
-            JsonArray array = JsonParser.parseString(rs.getString(1)).getAsJsonArray();
-            List<ItemStack> items = new ArrayList<>();
-
-            for (JsonElement el : array) {
-                items.add(ItemStackJson.fromJson(el.getAsJsonObject()));
-            }
-
-            return items;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return List.of();
-        }
-    }
-
-    public boolean saveKit(String name, ItemStack icon, List<ItemStack> items) {
-        JsonArray array = new JsonArray();
-
-        for (ItemStack stack : items) {
-            if (!stack.isEmpty()) {
-                array.add(ItemStackJson.toJson(stack));
-            }
-        }
-
-        if (icon == null || icon.isEmpty()) {
-            icon = new ItemStack(Items.CHEST);
-        }
-
-        try (PreparedStatement ps = connection.prepareStatement(
-                "INSERT OR REPLACE INTO kits(name, icon, kit)  VALUES (?, ?, ?)"
-        )) {
-            ps.setString(1, name);
-            ps.setString(2, GSON.toJson(ItemStackJson.toJson(icon)));
-            ps.setString(3, GSON.toJson(array));
             ps.executeUpdate();
-            return true;
-        } catch (Exception e) {
+
+        } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
+
+        return true;
     }
 
     public void removeKit(String name) {
@@ -132,5 +104,39 @@ public class KitManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private Kit fromResultSet(ResultSet rs) throws SQLException {
+        String name = rs.getString("name");
+        ItemStack icon = ItemStackJson.fromJson(
+                JsonParser.parseString(rs.getString("icon")).getAsJsonObject()
+        );
+        List<ItemStack> items = deserializeItems(rs.getString("items"));
+        int cost = rs.getInt("cost");
+        String permission = rs.getString("permission");
+        int cooldown = rs.getInt("cooldown");
+
+        return new Kit(name, items, icon, cost, permission, cooldown);
+    }
+
+    private String serializeItems(List<ItemStack> items) {
+        JsonArray array = new JsonArray();
+        for (ItemStack stack : items) {
+            if (!stack.isEmpty()) {
+                array.add(ItemStackJson.toJson(stack));
+            }
+        }
+        return GSON.toJson(array);
+    }
+
+    private List<ItemStack> deserializeItems(String json) {
+        List<ItemStack> items = new ArrayList<>();
+        JsonArray array = JsonParser.parseString(json).getAsJsonArray();
+
+        array.forEach(el ->
+                items.add(ItemStackJson.fromJson(el.getAsJsonObject()))
+        );
+
+        return items;
     }
 }

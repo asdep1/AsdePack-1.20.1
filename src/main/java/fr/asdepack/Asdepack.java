@@ -1,6 +1,8 @@
 package fr.asdepack;
 
 import fr.asdepack.command.PermissionUtil;
+import fr.asdepack.plugin.VaultAdapter;
+import fr.asdepack.plugin.WorldGuardAdapter;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -19,6 +21,8 @@ public class Asdepack {
     public static final ScrapManager SCRAP_MANAGER;
     public static final KitManager KITMANAGER;
     public static final String MODID = "asdepack";
+    public static WorldGuardAdapter WG_ADAPTER = new WorldGuardAdapter();
+    public static VaultAdapter VAULT_ADAPTER = new VaultAdapter();
 
     static {
         try {
@@ -44,6 +48,9 @@ public class Asdepack {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         PermissionUtil.init();
+
+        WG_ADAPTER.init();
+        VAULT_ADAPTER.init();
         RTPConfig.load();
     }
 }

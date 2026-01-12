@@ -1,8 +1,10 @@
 package fr.asdepack.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import fr.asdepack.Asdepack;
+import fr.asdepack.Kit;
 import fr.asdepack.gui.KitMenu;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -10,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +45,124 @@ public class KitCommand {
                                 .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.remove"))
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
                                         .suggests((ctx, builder) -> {
-                                            for (String s : Asdepack.KITMANAGER.getKitList()) {
-                                                builder.suggest(s.replace('§', '&').replace(' ', '_'));
+                                            for (Kit s : Asdepack.KITMANAGER.getAllKits()) {
+                                                builder.suggest(s.getName().replace('§', '&').replace(' ', '_'));
                                             }
                                             return builder.buildFuture();
                                         })
                                         .executes(ctx -> removeKit(
+                                                ctx.getSource(),
+                                                StringArgumentType.getString(ctx, "name")
+                                        ))
+                                )
+                        )
+                        .then(Commands.literal("edit")
+                                .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.edit"))
+                                .then(Commands.argument("name", StringArgumentType.greedyString())
+                                        .suggests((ctx, builder) -> {
+                                            for (Kit s : Asdepack.KITMANAGER.getAllKits()) {
+                                                builder.suggest(s.getName().replace('§', '&').replace(' ', '_'));
+                                            }
+                                            return builder.buildFuture();
+                                        })
+                                        .executes(ctx -> {
+                                            ServerPlayer player = ctx.getSource().getPlayer();
+                                            String name = StringArgumentType.getString(ctx, "name")
+                                                    .replace('&', '§').replace('_', ' ');
+
+                                            Kit kit = Asdepack.KITMANAGER.getKit(name);
+                                            if (kit == null) {
+                                                player.sendSystemMessage(Component.literal("§cKit introuvable."));
+                                                return 0;
+                                            }
+
+                                            ItemStack icon = player.getMainHandItem().copy();
+                                            if (icon == ItemStack.EMPTY) {
+                                                icon = new ItemStack(Items.CHEST);
+                                            }
+
+                                            Kit updated = new Kit(
+                                                    kit.getName(),
+                                                    new ArrayList<>(player.getInventory().items),
+                                                    icon,
+                                                    kit.getCost(),
+                                                    kit.getPermission(),
+                                                    kit.getCooldown()
+                                            );
+
+                                            Asdepack.KITMANAGER.saveKit(updated);
+                                            player.sendSystemMessage(Component.literal("§aKit modifié."));
+                                            return 1;
+                                        })
+                                )
+                        )
+
+                        .then(Commands.literal("setpermission")
+                                .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.permission"))
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .suggests((ctx, builder) -> {
+                                            for (Kit s : Asdepack.KITMANAGER.getAllKits()) {
+                                                builder.suggest(s.getName().replace('§', '&').replace(' ', '_'));
+                                            }
+                                            return builder.buildFuture();
+                                        })
+                                        .then(Commands.argument("permission", StringArgumentType.string())
+                                                .executes(ctx -> setPermission(
+                                                        ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "name"),
+                                                        StringArgumentType.getString(ctx, "permission")
+                                                ))
+                                        )
+                                )
+                        )
+
+                        .then(Commands.literal("setcooldown")
+                                .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.cooldown"))
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .suggests((ctx, builder) -> {
+                                            for (Kit s : Asdepack.KITMANAGER.getAllKits()) {
+                                                builder.suggest(s.getName().replace('§', '&').replace(' ', '_'));
+                                            }
+                                            return builder.buildFuture();
+                                        })
+                                        .then(Commands.argument("seconds", IntegerArgumentType.integer(0))
+                                                .executes(ctx -> setCooldown(
+                                                        ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "name"),
+                                                        IntegerArgumentType.getInteger(ctx, "seconds")
+                                                ))
+                                        )
+                                )
+                        )
+                        .then(Commands.literal("setcost")
+                                .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.cost"))
+                                .then(Commands.argument("name", StringArgumentType.string())
+                                        .suggests((ctx, builder) -> {
+                                            for (Kit s : Asdepack.KITMANAGER.getAllKits()) {
+                                                builder.suggest(s.getName().replace('§', '&').replace(' ', '_'));
+                                            }
+                                            return builder.buildFuture();
+                                        })
+                                        .then(Commands.argument("cost", IntegerArgumentType.integer(0))
+                                                .executes(ctx -> setCost(
+                                                        ctx.getSource(),
+                                                        StringArgumentType.getString(ctx, "name"),
+                                                        IntegerArgumentType.getInteger(ctx, "cost")
+                                                ))
+                                        )
+                                )
+                        )
+
+                        .then(Commands.literal("give")
+                                .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.give"))
+                                .then(Commands.argument("name", StringArgumentType.greedyString())
+                                        .suggests((ctx, builder) -> {
+                                            for (Kit s : Asdepack.KITMANAGER.getAllKits()) {
+                                                builder.suggest(s.getName().replace('§', '&').replace(' ', '_'));
+                                            }
+                                            return builder.buildFuture();
+                                        })
+                                        .executes(ctx -> giveKit(
                                                 ctx.getSource(),
                                                 StringArgumentType.getString(ctx, "name")
                                         ))
@@ -72,7 +187,7 @@ public class KitCommand {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
 
-        List<String> kits = Asdepack.KITMANAGER.getKitList();
+        List<Kit> kits = Asdepack.KITMANAGER.getAllKits();
 
         if (kits.isEmpty()) {
             player.sendSystemMessage(Component.literal("§cAucun kit enregistré."));
@@ -80,8 +195,8 @@ public class KitCommand {
         }
 
         player.sendSystemMessage(Component.literal("§6Liste des kits :"));
-        for (String kit : kits) {
-            player.sendSystemMessage(Component.literal(" §7- §e" + kit));
+        for (Kit kit : kits) {
+            player.sendSystemMessage(Component.literal(" §7- §e" + kit.getName()));
         }
 
         return 1;
@@ -92,15 +207,20 @@ public class KitCommand {
         if (player == null) return 0;
         name = name.replace('&', '§').replace('_', ' ');
 
-        if (Asdepack.KITMANAGER.getKitList().contains(name)) {
+        String finalName = name;
+        if (Asdepack.KITMANAGER.getAllKits().stream()
+                .anyMatch(kit -> kit.getName().equalsIgnoreCase(finalName))) {
             player.sendSystemMessage(Component.literal("§cLe kit §e" + name + " §cexiste déjà."));
             return 0;
         }
 
         List<ItemStack> items = new ArrayList<>(player.getInventory().items);
         ItemStack icon = player.getMainHandItem().copy();
+        if (icon == ItemStack.EMPTY) {
+            icon = new ItemStack(Items.CHEST);
+        }
 
-        if (Asdepack.KITMANAGER.saveKit(name, icon, items)) {
+        if (Asdepack.KITMANAGER.saveKit(new Kit(name, items, icon))) {
             player.sendSystemMessage(Component.literal("§aKit §e" + name + " §aajouté avec succès."));
         } else {
             player.sendSystemMessage(Component.literal("§cErreur lors de l'enregistrement du kit §e" + name + " §c."));
@@ -115,13 +235,79 @@ public class KitCommand {
         if (player == null) return 0;
 
         name = name.replace('&', '§').replace('_', ' ');
-        if (!Asdepack.KITMANAGER.getKitList().contains(name)) {
+        String finalName = name;
+        if (!Asdepack.KITMANAGER.getAllKits().stream()
+                .anyMatch(kit -> kit.getName().equalsIgnoreCase(finalName))) {
             player.sendSystemMessage(Component.literal("§cLe kit §e" + name + " §cn'existe pas."));
             return 0;
         }
 
         Asdepack.KITMANAGER.removeKit(name);
         player.sendSystemMessage(Component.literal("§aKit §e" + name + " §asupprimé."));
+        return 1;
+    }
+
+    private static int giveKit(CommandSourceStack source, String name) {
+        ServerPlayer player = source.getPlayer();
+        name = name.replace('&', '§').replace('_', ' ');
+
+        Kit kit = Asdepack.KITMANAGER.getKit(name);
+        if (kit == null) {
+            player.sendSystemMessage(Component.literal("§cKit introuvable."));
+            return 0;
+        }
+
+        for (ItemStack stack : kit.getItems()) {
+            player.getInventory().placeItemBackInInventory(stack.copy());
+        }
+        return 1;
+    }
+
+    private static int setCooldown(CommandSourceStack source, String name, int seconds) {
+        ServerPlayer player = source.getPlayer();
+        name = name.replace('&', '§').replace('_', ' ');
+        Kit kit = Asdepack.KITMANAGER.getKit(name);
+        if (kit == null) return 0;
+
+        Kit updated = new Kit(
+                kit.getName(), kit.getItems(), kit.getIcon(),
+                kit.getCost(), kit.getPermission(), seconds
+        );
+
+        Asdepack.KITMANAGER.saveKit(updated);
+        player.sendSystemMessage(Component.literal("§aCooldown défini à " + seconds + "s."));
+        return 1;
+    }
+
+    private static int setCost(CommandSourceStack source, String name, int cost) {
+        ServerPlayer player = source.getPlayer();
+        name = name.replace('&', '§').replace('_', ' ');
+        Kit kit = Asdepack.KITMANAGER.getKit(name);
+        if (kit == null) return 0;
+
+        Kit updated = new Kit(
+                kit.getName(), kit.getItems(), kit.getIcon(),
+                cost, kit.getPermission(), kit.getCooldown()
+        );
+
+        Asdepack.KITMANAGER.saveKit(updated);
+        player.sendSystemMessage(Component.literal("§aPrix défini à §e" + cost + "§a."));
+        return 1;
+    }
+
+    private static int setPermission(CommandSourceStack source, String name, String permission) {
+        ServerPlayer player = source.getPlayer();
+        name = name.replace('&', '§').replace('_', ' ');
+        Kit kit = Asdepack.KITMANAGER.getKit(name);
+        if (kit == null) return 0;
+
+        Kit updated = new Kit(
+                kit.getName(), kit.getItems(), kit.getIcon(),
+                kit.getCost(), permission, kit.getCooldown()
+        );
+
+        Asdepack.KITMANAGER.saveKit(updated);
+        player.sendSystemMessage(Component.literal("§aPermission mise à jour."));
         return 1;
     }
 }
