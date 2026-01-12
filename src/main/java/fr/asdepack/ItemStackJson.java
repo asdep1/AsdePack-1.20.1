@@ -24,7 +24,7 @@ public final class ItemStackJson {
     }
 
     public static ItemStack fromJson(JsonObject obj) {
-        Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(obj.get("id").getAsString()));
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(obj.get("id").getAsString()));
         int count = obj.get("count").getAsInt();
 
         ItemStack stack = new ItemStack(item, count);

@@ -44,7 +44,7 @@ public final class ItemKeyUtil {
     public static ItemStack toItemStack(String keyJson) {
         JsonObject key = JsonParser.parseString(keyJson).getAsJsonObject();
 
-        ResourceLocation itemId = new ResourceLocation(
+        ResourceLocation itemId = ResourceLocation.parse(
                 key.get("item").getAsString()
         );
 

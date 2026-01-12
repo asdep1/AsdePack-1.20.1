@@ -1,6 +1,5 @@
-package fr.asdepack.gui;
+package fr.asdepack.client.gui;
 
-import fr.asdepack.Asdepack;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
@@ -14,7 +13,8 @@ public class StashMenu extends BorderedMenu {
     public StashMenu(int id, Inventory playerInv, Player player) {
         super(id, playerInv, player, new int[]{}, USEABLE_SLOTS);
 
-        List<ItemStack> stacks = Asdepack.STASHMANAGER.getStash(player.getUUID());
+//        List<ItemStack> stacks = Asdepack.STASHMANAGER.getStash(player.getUUID());
+        List<ItemStack> stacks = new ArrayList<>();
         int slot = 0;
         for (ItemStack items : stacks) {
             container.setItem(USEABLE_SLOTS[slot++], items);
@@ -39,7 +39,7 @@ public class StashMenu extends BorderedMenu {
         for (int slot : USEABLE_SLOTS) {
             stacks.add(getSlot(slot).getItem());
         }
-        Asdepack.STASHMANAGER.saveStash(player.getUUID(), stacks);
+//        Asdepack.STASHMANAGER.saveStash(player.getUUID(), stacks);
     }
 
     @Override

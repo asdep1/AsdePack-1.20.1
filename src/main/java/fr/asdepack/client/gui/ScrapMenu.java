@@ -1,6 +1,5 @@
-package fr.asdepack.gui;
+package fr.asdepack.client.gui;
 
-import fr.asdepack.Asdepack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.SimpleMenuProvider;
@@ -10,6 +9,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,8 @@ public class ScrapMenu extends BorderedMenu {
 
         this.page = page;
 
-        List<ItemStack> items = Asdepack.SCRAP_MANAGER.getScrapList();
+//        List<ItemStack> items = Asdepack.SCRAP_MANAGER.getScrapList();
+        List<ItemStack> items = new ArrayList<>();
 
         int pageSize = USEABLE_SLOTS.length;
         int startIndex = page * pageSize;
@@ -92,7 +93,7 @@ public class ScrapMenu extends BorderedMenu {
         ItemStack original = pendingDelete.remove(slot);
         container.setItem(slot, ItemStack.EMPTY);
         this.setCarried(ItemStack.EMPTY);
-        Asdepack.SCRAP_MANAGER.removeScrap(original);
+//        Asdepack.SCRAP_MANAGER.removeScrap(original);
         this.player.openMenu(new SimpleMenuProvider(
                 (id, inv, p) -> new ScrapMenu(id, inv, p, this.page),
                 Component.literal("Scrap list")
@@ -126,10 +127,10 @@ public class ScrapMenu extends BorderedMenu {
             lastPage();
             return;
         }
-        this.player.openMenu(new SimpleMenuProvider(
-                (id, inv, p) -> new ScrapConfigMenu(id, inv, p, stack),
-                Component.literal("Scrap config")
-        ));
+//        this.player.openMenu(new SimpleMenuProvider(
+//                (id, inv, p) -> new ScrapConfigMenu(id, inv, p, stack),
+//                Component.literal("Scrap config")
+//        ));
     }
 
     @Override

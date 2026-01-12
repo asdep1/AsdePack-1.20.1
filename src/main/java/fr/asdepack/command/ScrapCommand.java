@@ -2,17 +2,12 @@ package fr.asdepack.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import fr.asdepack.Asdepack;
-import fr.asdepack.gui.ScrapMenu;
-import fr.asdepack.gui.ScrappingMenu;
+import fr.asdepack.client.gui.ScrappingMenu;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.item.ItemStack;
-
-import java.util.ArrayList;
 
 public class ScrapCommand {
 
@@ -43,28 +38,28 @@ public class ScrapCommand {
     }
 
     private static int open(CommandContext<CommandSourceStack> context) {
-        ServerPlayer player = context.getSource().getPlayer();
-        if (player == null) return 0;
-
-        player.openMenu(new SimpleMenuProvider(
-                ScrapMenu::new,
-                Component.literal("Scrap list")
-        ));
+//        ServerPlayer player = context.getSource().getPlayer();
+//        if (player == null) return 0;
+//
+//        player.openMenu(new SimpleMenuProvider(
+//                ScrapMenu::new,
+//                Component.literal("Scrap list")
+//        ));
 
         return 1;
     }
 
     private static int add(CommandContext<CommandSourceStack> context) {
-        ServerPlayer player = context.getSource().getPlayer();
-        if (player == null) return 0;
-
-        if (player.getMainHandItem() == ItemStack.EMPTY) return 0;
-        if (Asdepack.SCRAP_MANAGER.hasScrap(player.getMainHandItem())) {
-            player.sendSystemMessage(Component.literal("La bdd contient déjà l'item " + player.getMainHandItem()));
-            return 0;
-        }
-        Asdepack.SCRAP_MANAGER.saveScrap(player.getMainHandItem(), new ArrayList<>());
-        player.sendSystemMessage(Component.literal("Ajout de l'item " + player.getMainHandItem()));
+//        ServerPlayer player = context.getSource().getPlayer();
+//        if (player == null) return 0;
+//
+//        if (player.getMainHandItem() == ItemStack.EMPTY) return 0;
+//        if (Asdepack.SCRAP_MANAGER.hasScrap(player.getMainHandItem())) {
+//            player.sendSystemMessage(Component.literal("La bdd contient déjà l'item " + player.getMainHandItem()));
+//            return 0;
+//        }
+//        Asdepack.SCRAP_MANAGER.saveScrap(player.getMainHandItem(), new ArrayList<>());
+//        player.sendSystemMessage(Component.literal("Ajout de l'item " + player.getMainHandItem()));
         return 1;
     }
 }

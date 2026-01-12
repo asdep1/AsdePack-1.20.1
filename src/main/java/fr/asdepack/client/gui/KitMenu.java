@@ -1,14 +1,10 @@
-package fr.asdepack.gui;
+package fr.asdepack.client.gui;
 
-import fr.asdepack.Asdepack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-
-import java.util.List;
 
 public class KitMenu extends BorderedMenu {
 
@@ -25,34 +21,34 @@ public class KitMenu extends BorderedMenu {
 
         this.page = page;
 
-        List<String> items = Asdepack.KITMANAGER.getKitList();
-
-        int pageSize = USEABLE_SLOTS.length;
-        int startIndex = page * pageSize;
-
-        for (int i = 0; i < pageSize; i++) {
-            int globalIndex = startIndex + i;
-
-            if (globalIndex >= items.size()) {
-                break;
-            }
-            String kitName = items.get(globalIndex);
-            int slotId = USEABLE_SLOTS[i];
-//            container.setItem(slotId, new ItemStack(Items.NAME_TAG).setHoverName(Component.literal(items.get(globalIndex))));
-            container.setItem(slotId, Asdepack.KITMANAGER.getKitIcon(items.get(globalIndex)).setHoverName(Component.literal(kitName)));
-        }
-
-        if (items.size() > (page + 1) * pageSize) {
-            container.setItem(50,
-                    new ItemStack(Items.ARROW)
-                            .setHoverName(Component.literal("Next page")));
-        }
-
-        if (page > 0) {
-            container.setItem(48,
-                    new ItemStack(Items.ARROW)
-                            .setHoverName(Component.literal("Last page")));
-        }
+//        List<String> items = Asdepack.KITMANAGER.getKitList();
+//
+//        int pageSize = USEABLE_SLOTS.length;
+//        int startIndex = page * pageSize;
+//
+//        for (int i = 0; i < pageSize; i++) {
+//            int globalIndex = startIndex + i;
+//
+//            if (globalIndex >= items.size()) {
+//                break;
+//            }
+//            String kitName = items.get(globalIndex);
+//            int slotId = USEABLE_SLOTS[i];
+////            container.setItem(slotId, new ItemStack(Items.NAME_TAG).setHoverName(Component.literal(items.get(globalIndex))));
+//            container.setItem(slotId, Asdepack.KITMANAGER.getKitIcon(items.get(globalIndex)).setHoverName(Component.literal(kitName)));
+//        }
+//
+//        if (items.size() > (page + 1) * pageSize) {
+//            container.setItem(50,
+//                    new ItemStack(Items.ARROW)
+//                            .setHoverName(Component.literal("Next page")));
+//        }
+//
+//        if (page > 0) {
+//            container.setItem(48,
+//                    new ItemStack(Items.ARROW)
+//                            .setHoverName(Component.literal("Last page")));
+//        }
     }
 
     private void nextPage() {
@@ -83,11 +79,11 @@ public class KitMenu extends BorderedMenu {
             return;
         }
 
-        List<ItemStack> items = Asdepack.KITMANAGER.getKitFor(stack.getHoverName().getString());
-        if (items == null) return;
-        for (ItemStack item : items) {
-            player.getInventory().placeItemBackInInventory(item);
-        }
+//        List<ItemStack> items = Asdepack.KITMANAGER.getKitFor(stack.getHoverName().getString());
+//        if (items == null) return;
+//        for (ItemStack item : items) {
+//            player.getInventory().placeItemBackInInventory(item);
+//        }
     }
 
     @Override

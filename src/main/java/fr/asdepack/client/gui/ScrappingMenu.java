@@ -1,7 +1,6 @@
-package fr.asdepack.gui;
+package fr.asdepack.client.gui;
 
 import com.corrinedev.gundurability.config.Config;
-import fr.asdepack.Asdepack;
 import fr.asdepack.ItemKeyUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -84,14 +83,15 @@ public class ScrappingMenu extends BorderedMenu {
         for (ItemStack input : itemsToProcess) {
             if (input.isEmpty()) continue;
 
-            if (!Asdepack.SCRAP_MANAGER.hasScrap(input)) continue;
+//            if (!Asdepack.SCRAP_MANAGER.hasScrap(input)) continue;
 
             float ratio = getDamageRatio(input);
             if (ratio <= 0f) continue;
 
             int inputCount = input.getCount();
 
-            List<ItemStack> scraps = Asdepack.SCRAP_MANAGER.getScrapFor(input);
+//            List<ItemStack> scraps = Asdepack.SCRAP_MANAGER.getScrapFor(input);
+            List<ItemStack> scraps = new ArrayList<>();
             for (ItemStack scrap : scraps) {
                 int amount = Math.max(1, Math.round(scrap.getCount() * inputCount * ratio));
 

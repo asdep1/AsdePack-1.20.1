@@ -1,6 +1,9 @@
 package fr.asdepack;
 
+import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.support.ConnectionSource;
 import fr.asdepack.command.PermissionUtil;
+import fr.asdepack.server.Server;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -8,6 +11,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.sql.SQLException;
 
@@ -15,24 +19,23 @@ import java.sql.SQLException;
 @Mod(Asdepack.MODID)
 public class Asdepack {
 
-    public static final StashManager STASHMANAGER;
-    public static final ScrapManager SCRAP_MANAGER;
-    public static final KitManager KITMANAGER;
+//    public static final StashManager STASHMANAGER;
+//    public static final ScrapManager SCRAP_MANAGER;
+//    public static final KitManager KITMANAGER;
     public static final String MODID = "asdepack";
+//
+//    static {
+//        try {
+//            STASHMANAGER = new StashManager("config/stash.db");
+//            SCRAP_MANAGER = new ScrapManager("config/scrap.db");
+//            KITMANAGER = new KitManager("config/kits.db");
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
-    static {
-        try {
-            STASHMANAGER = new StashManager("config/stash.db");
-            SCRAP_MANAGER = new ScrapManager("config/scrap.db");
-            KITMANAGER = new KitManager("config/kits.db");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Asdepack() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
+    public Asdepack(FMLJavaModLoadingContext context) throws ClassNotFoundException {
+        IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -42,8 +45,12 @@ public class Asdepack {
     }
 
     @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        PermissionUtil.init();
+    public void onServerStarting(ServerStartingEvent event) throws SQLException {
+        if(FMLEnvironment.production) {
+            PermissionUtil.init();
+        }
+
         RTPConfig.load();
+        Server.init();
     }
 }

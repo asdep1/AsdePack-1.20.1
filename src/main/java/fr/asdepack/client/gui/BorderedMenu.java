@@ -1,4 +1,4 @@
-package fr.asdepack.gui;
+package fr.asdepack.client.gui;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;

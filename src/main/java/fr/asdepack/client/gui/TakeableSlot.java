@@ -1,4 +1,4 @@
-package fr.asdepack.gui;
+package fr.asdepack.client.gui;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
