@@ -49,7 +49,7 @@ public class RTPCommand {
         if (player == null) return 0;
 
         RTPConfig.add(player.getOnPos().getCenter());
-        player.sendSystemMessage(Component.literal("Position ajouter"));
+        player.sendSystemMessage(Component.literal("Position ajoutée"));
         RTPConfig.save();
         return 1;
     }
