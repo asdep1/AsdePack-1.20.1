@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-import java.sql.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +58,58 @@ public class KitManager {
             if (kit != null) {
                 this.kitDao.delete(kit);
             }
+        } catch (SQLException e) {
+            Server.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void setPermission(String name, String permission) {
+        try {
+            Kit kit = getKitByName(name);
+            if (kit == null) {
+                throw new SQLException("Kit with name " + name + " does not exist.");
+            }
+            kit.setPermission(permission);
+            this.kitDao.update(kit);
+        } catch (SQLException e) {
+            Server.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void setCooldown(String name, int cooldown) {
+        try {
+            Kit kit = getKitByName(name);
+            if (kit == null) {
+                throw new SQLException("Kit with name " + name + " does not exist.");
+            }
+            kit.setCooldown(cooldown);
+            this.kitDao.update(kit);
+        } catch (SQLException e) {
+            Server.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void setCost(String name, int cost) {
+        try {
+            Kit kit = getKitByName(name);
+            if (kit == null) {
+                throw new SQLException("Kit with name " + name + " does not exist.");
+            }
+            kit.setCost(cost);
+            this.kitDao.update(kit);
+        } catch (SQLException e) {
+            Server.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void setIcon(String name, ItemStack icon) {
+        try {
+            Kit kit = getKitByName(name);
+            if (kit == null) {
+                throw new SQLException("Kit with name " + name + " does not exist.");
+            }
+            kit.setIcon(icon);
+            this.kitDao.update(kit);
         } catch (SQLException e) {
             Server.getLogger().warning(e.getMessage());
         }

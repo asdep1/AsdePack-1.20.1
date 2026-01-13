@@ -57,7 +57,7 @@ public class Kit {
             return 2;
         }
 
-        if (Asdepack.VAULT_ADAPTER.getBalance(player) < cost) {
+        if (Asdepack.VAULT_ADAPTER.isEnabled() && Asdepack.VAULT_ADAPTER.getBalance(player) < cost) {
             return 3;
         }
 

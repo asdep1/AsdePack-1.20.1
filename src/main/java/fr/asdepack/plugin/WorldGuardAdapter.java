@@ -10,55 +10,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class WorldGuardAdapter {
+public class WorldGuardAdapter extends Adapter {
 
-    private Object wgPlugin;
-    private ClassLoader bukkitClassLoader;
-
-    public void init() {
-        try {
-            // Sous Mohist, on récupère le Bukkit ClassLoader via une classe Bukkit
-            Class<?> bukkitClass = Class.forName("org.bukkit.Bukkit");
-            bukkitClassLoader = bukkitClass.getClassLoader();
-
-            Method getPluginManager = bukkitClass.getMethod("getPluginManager");
-            Object pluginManager = getPluginManager.invoke(null);
-
-            Method getPlugin = pluginManager.getClass().getMethod("getPlugin", String.class);
-            wgPlugin = getPlugin.invoke(pluginManager, "WorldGuard");
-
-            if (wgPlugin != null) {
-                System.out.println("[Asdepack] WorldGuard détecté avec succès via Mohist.");
-            }
-        } catch (Exception e) {
-            System.err.println("[Asdepack] Impossible de lier WorldGuard : " + e.getMessage());
-        }
+    public WorldGuardAdapter() {
+        super("WorldGuard");
     }
 
     public List<ProtectedRegion> getApplicableRegions(String worldName, Vec3 location) {
         List<ProtectedRegion> regions = new ArrayList<>();
-        if (wgPlugin == null) return regions;
+        if (!isEnabled()) return regions;
 
         try {
-            Class<?> bukkitClass = Class.forName("org.bukkit.Bukkit", true, bukkitClassLoader);
+            Class<?> bukkitClass = Class.forName("org.bukkit.Bukkit", true, this.bukkitClassLoader);
             Method getWorldMethod = bukkitClass.getMethod("getWorld", String.class);
             Object bukkitWorld = getWorldMethod.invoke(null, worldName);
             if (bukkitWorld == null) return regions;
 
-            Class<?> bukkitAdapterClass = Class.forName("com.sk89q.worldedit.bukkit.BukkitAdapter", true, wgPlugin.getClass().getClassLoader());
-            Method adaptWorld = bukkitAdapterClass.getMethod("adapt", Class.forName("org.bukkit.World", true, bukkitClassLoader));
+            Class<?> bukkitAdapterClass = Class.forName("com.sk89q.worldedit.bukkit.BukkitAdapter", true, this.pluginClassLoader);
+            Method adaptWorld = bukkitAdapterClass.getMethod("adapt", Class.forName("org.bukkit.World", true, this.bukkitClassLoader));
             Object wgWorld = adaptWorld.invoke(null, bukkitWorld);
 
-            Class<?> wgClass = Class.forName("com.sk89q.worldguard.WorldGuard", true, wgPlugin.getClass().getClassLoader());
+            Class<?> wgClass = Class.forName("com.sk89q.worldguard.WorldGuard", true, this.pluginClassLoader);
             Object wgInstance = wgClass.getMethod("getInstance").invoke(null);
             Object platform = wgInstance.getClass().getMethod("getPlatform").invoke(wgInstance);
             Object container = platform.getClass().getMethod("getRegionContainer").invoke(platform);
 
-            Method getManager = container.getClass().getMethod("get", Class.forName("com.sk89q.worldedit.world.World", true, wgPlugin.getClass().getClassLoader()));
+            Method getManager = container.getClass().getMethod("get", Class.forName("com.sk89q.worldedit.world.World", true, this.pluginClassLoader));
             Object regionManager = getManager.invoke(container, wgWorld);
 
             if (regionManager != null) {
-                Class<?> bv3Class = Class.forName("com.sk89q.worldedit.math.BlockVector3", true, wgPlugin.getClass().getClassLoader());
+                Class<?> bv3Class = Class.forName("com.sk89q.worldedit.math.BlockVector3", true, this.pluginClassLoader);
                 Method at = bv3Class.getMethod("at", double.class, double.class, double.class);
                 Object vector = at.invoke(null, location.x, location.y, location.z);
 
@@ -83,6 +64,7 @@ public class WorldGuardAdapter {
     }
 
     public boolean isPlayerInRegion(Player player, String region) {
+        if (!isEnabled()) return false;
         String worldName = player.level().dimension().location().getPath();
         if (worldName.equals("overworld")) worldName = "world";
 
