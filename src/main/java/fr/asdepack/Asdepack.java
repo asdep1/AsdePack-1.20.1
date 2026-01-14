@@ -1,14 +1,11 @@
 package fr.asdepack;
 
-import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.support.ConnectionSource;
-import fr.asdepack.client.init.ModMenusInit;
-import fr.asdepack.command.PermissionUtil;
-import fr.asdepack.network.PacketHelper;
+import fr.asdepack.server.command.PermissionUtil;
+import fr.asdepack.common.network.PacketHelper;
 import fr.asdepack.server.Server;
-import fr.asdepack.plugin.VaultAdapter;
-import fr.asdepack.plugin.WorldGuardAdapter;
-import net.minecraft.resources.ResourceLocation;
+import fr.asdepack.server.bridges.VaultAdapter;
+import fr.asdepack.server.bridges.WorldGuardAdapter;
+import fr.asdepack.server.modules.rtp.RTPConfig;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -17,8 +14,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.sql.SQLException;
 
@@ -35,7 +30,7 @@ public class Asdepack {
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
-        ModRegistration.register(modEventBus);
+        ModRegistries.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

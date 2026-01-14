@@ -2,9 +2,9 @@ package fr.asdepack.client.screen;
 
 import fr.asdepack.Asdepack;
 import fr.asdepack.client.screen.components.ButtonScrollList;
-import fr.asdepack.client.screen.menus.KitPreviewMenu;
-import fr.asdepack.network.PacketHelper;
-import fr.asdepack.network.packets.SRequestKitPacket;
+import fr.asdepack.common.menus.KitPreviewMenu;
+import fr.asdepack.common.network.PacketHelper;
+import fr.asdepack.common.network.packets.SRequestKitPacket;
 import fr.asdepack.types.Kit;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 

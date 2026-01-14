@@ -1,8 +1,8 @@
 package fr.asdepack.client;
 
 import fr.asdepack.Asdepack;
-import fr.asdepack.network.PacketHelper;
-import fr.asdepack.network.packets.STestPacket;
+import fr.asdepack.common.network.PacketHelper;
+import fr.asdepack.common.network.packets.STestPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;

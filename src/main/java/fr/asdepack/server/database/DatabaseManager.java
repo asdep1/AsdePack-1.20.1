@@ -1,12 +1,11 @@
 package fr.asdepack.server.database;
 
 
-import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import fr.asdepack.server.KitManager;
+import fr.asdepack.server.modules.kits.KitManager;
 import fr.asdepack.server.Server;
 import fr.asdepack.types.Kit;
 import lombok.Getter;
