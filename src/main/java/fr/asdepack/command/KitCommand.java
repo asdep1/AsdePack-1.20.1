@@ -3,7 +3,7 @@ package fr.asdepack.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import fr.asdepack.client.gui.KitMenu;
+import fr.asdepack.client.screen.menus.KitPreviewMenu;
 import fr.asdepack.server.Server;
 import fr.asdepack.types.Kit;
 import lombok.SneakyThrows;
@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.network.NetworkHooks;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -34,6 +35,10 @@ public class KitCommand {
                         .then(Commands.literal("list")
                                 .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.list"))
                                 .executes(ctx -> {
+                                    if (ctx.getSource().getPlayer() == null) return 0;
+                                    ctx.getSource().getPlayer().sendSystemMessage(
+                                            Component.literal("Liste des kits :").withStyle(ChatFormatting.RED)
+                                    );
                                     try {
                                         return listKits(ctx.getSource());
                                     } catch (SQLException e) {
@@ -44,6 +49,7 @@ public class KitCommand {
                                     }
                                 })
                         )
+
                         .then(Commands.literal("add")
                                 .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.add"))
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
@@ -62,6 +68,7 @@ public class KitCommand {
                                         })
                                 )
                         )
+//
                         .then(Commands.literal("remove")
                                 .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.remove"))
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
@@ -201,6 +208,10 @@ public class KitCommand {
                                 )
                         )
 
+                        .then(Commands.literal("dev")
+                                .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.dev"))
+                                .executes(ctx -> dev(ctx.getSource()))
+                        )
         );
     }
 
@@ -209,23 +220,40 @@ public class KitCommand {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
 
-        player.openMenu(new SimpleMenuProvider(
-                (int pContainerId, Inventory pPlayerInventory, Player pPlayer) -> {
-                    try {
-                        return new KitMenu(
-                                pContainerId,
-                                pPlayerInventory,
-                                pPlayer,
-                                0
-                        );
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                },
+        List<Kit> kits = Server.getDatabaseManager().getKitManager().getKits();
+
+        NetworkHooks.openScreen(player, new SimpleMenuProvider(
+                (id, inventory, p) -> new KitPreviewMenu(id, inventory, kits),
                 Component.literal("Kit list")
-        ));
+        ), (buffer) -> {
+            buffer.writeInt(kits.size());
+            for (Kit kit : kits) {
+                buffer.writeUtf(Kit.Serializer.toJson(kit));
+            }
+        });
 
         return 1;
+    }
+
+    private static int dev(CommandSourceStack source) {
+        try {
+            List<Kit> kits = Server.getDatabaseManager().getKitManager().getKits();
+//            source.getPlayer().openMenu(new SimpleMenuProvider(
+//                    (int pContainerId, Inventory pPlayerInventory, Player pPlayer) -> {
+//                        return new KitMenu(
+//                               source.getPlayer(),
+//                                kits
+//                        );
+//                    },
+//                    Component.literal("Kit list")
+//            ));
+            return 1;
+        } catch (SQLException e) {
+            System.out.println("An error occurred while fetching kits for dev command:");
+            Server.getLogger().warning(e.getMessage());
+            return 0;
+        }
+
     }
 
     private static int listKits(CommandSourceStack source) throws SQLException {

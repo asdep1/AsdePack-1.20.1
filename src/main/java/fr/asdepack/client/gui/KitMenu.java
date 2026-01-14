@@ -1,8 +1,7 @@
 package fr.asdepack.client.gui;
 
 import fr.asdepack.Asdepack;
-import fr.asdepack.KitCooldownManager;
-import fr.asdepack.client.gui.BorderedMenu;
+import fr.asdepack.server.KitCooldownManager;
 import fr.asdepack.server.Server;
 import fr.asdepack.types.Kit;
 import net.minecraft.network.chat.Component;
@@ -110,8 +109,8 @@ public class KitMenu extends BorderedMenu {
         if (kit == null) return;
 
         if (player instanceof ServerPlayer serverPlayer) {
-            switch (kit.canGive(serverPlayer)) {
-                case 0:
+            switch (Kit.canGive(kit, serverPlayer)) {
+                case SUCCESS:
                     for (ItemStack item : kit.getItems()) {
                         player.getInventory().placeItemBackInInventory(item.copy());
                     }
@@ -120,14 +119,14 @@ public class KitMenu extends BorderedMenu {
                     player.sendSystemMessage(Component.literal("§aKit reçu."));
                     player.closeContainer();
                     break;
-                case 1:
+                case NO_PERMISSION:
                     player.sendSystemMessage(Component.literal("§cVous n'avez pas la permission."));
                     break;
-                case 2:
+                case ON_COOLDOWN:
                     long remain = KitCooldownManager.getRemaining(serverPlayer, kit);
                     player.sendSystemMessage(Component.literal("§cCooldown: " + remain + "s"));
                     break;
-                case 3:
+                case INSUFFICIENT_FUNDS:
                     player.sendSystemMessage(Component.literal("§cVous n'avez pas assez d'argent (§e" + kit.getCost() + "§c)."));
                     break;
             }
