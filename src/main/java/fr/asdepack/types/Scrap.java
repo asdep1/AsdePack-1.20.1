@@ -2,6 +2,8 @@ package fr.asdepack.types;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import fr.asdepack.types.serializers.ItemStackListPersister;
+import fr.asdepack.types.serializers.ItemStackPersister;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
