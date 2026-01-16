@@ -16,7 +16,7 @@ public class ScrapConfigMenu extends BorderedMenu {
     private final List<ItemStack> SCRAPPEDRESULT;
     private final ItemStack SELECTEDITEM;
 
-    public ScrapConfigMenu(int id, Inventory playerInv, Player player, ItemStack item) {
+    public ScrapConfigMenu(int id, Inventory playerInv, Player player, ItemStack item) throws Exception {
         super(id, playerInv, player, TAKEABLESLOT, USEABLE_SLOTS);
         this.SELECTEDITEM = item;
         this.SCRAPPEDRESULT = Server.getDatabaseManager().getScrapManager().getScrapByItem(Scrap.compatTacz(item)).getScraps();
@@ -45,7 +45,12 @@ public class ScrapConfigMenu extends BorderedMenu {
         for (int slot : USEABLE_SLOTS) {
             stacks.add(getSlot(slot).getItem());
         }
-        Scrap s = Server.getDatabaseManager().getScrapManager().getScrapByItem(Scrap.compatTacz(SELECTEDITEM));
+        Scrap s = null;
+        try {
+            s = Server.getDatabaseManager().getScrapManager().getScrapByItem(Scrap.compatTacz(SELECTEDITEM));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         s.setScraps(stacks);
         Server.getDatabaseManager().getScrapManager().updateScrap(s);
     }

@@ -35,6 +35,7 @@ public class DatabaseManager {
         ConnectionSource connectionSource = new JdbcConnectionSource(databaseUrl);
 
         this.connectionSource = connectionSource;
+
         this.kitManager = new KitManager(DaoManager.createDao(connectionSource, Kit.class));
         TableUtils.createTableIfNotExists(connectionSource, Kit.class);
 

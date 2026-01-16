@@ -134,7 +134,13 @@ public class ScrapMenu extends BorderedMenu {
             return;
         }
         this.player.openMenu(new SimpleMenuProvider(
-                (id, inv, p) -> new ScrapConfigMenu(id, inv, p, stack),
+                (id, inv, p) -> {
+                    try {
+                        return new ScrapConfigMenu(id, inv, p, stack);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
                 Component.literal("Scrap config")
         ));
     }

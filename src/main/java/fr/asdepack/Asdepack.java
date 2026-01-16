@@ -1,5 +1,8 @@
 package fr.asdepack;
 
+import fr.asdepack.common.registries.ModCreativeTabs;
+import fr.asdepack.common.registries.ModItems;
+import fr.asdepack.common.registries.SoundRegistry;
 import fr.asdepack.server.command.PermissionUtil;
 import fr.asdepack.common.network.PacketHelper;
 import fr.asdepack.server.Server;
@@ -29,8 +32,12 @@ public class Asdepack {
     public Asdepack(FMLJavaModLoadingContext context) throws ClassNotFoundException {
         IEventBus modEventBus = context.getModEventBus();
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(ModItems::addCreativeTab );
         MinecraftForge.EVENT_BUS.register(this);
         ModRegistries.register(modEventBus);
+        ModItems.register(modEventBus);
+        SoundRegistry.register(modEventBus);
+        ModCreativeTabs.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

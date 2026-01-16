@@ -112,6 +112,17 @@ repositories {
         url = "https://repo.papermc.io/repository/maven-public/"
     }
     mavenCentral()
+    maven {
+        name = "henkelmax.public"
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -127,6 +138,11 @@ dependencies {
     minecraftLibrary 'org.xerial:sqlite-jdbc:3.41.2.2'
     compileOnly fileTree(dir:"libs", include:"LuckPerms-Forge-5.4.88.jar")
     implementation fileTree(dir:"libs", include:"*.jar", exclude:"LuckPerms-Forge-5.4.88.jar" )
+
+    // Simple voice chat
+    implementation "de.maxhenkel.voicechat:voicechat-api:2.4.0"
+    implementation "de.maxhenkel.opus4j:opus4j:2.0.2"
+    runtimeOnly fg.deobf("maven.modrinth:simple-voice-chat:forge-1.20.1-2.6.11")
 
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'

@@ -22,8 +22,10 @@ public class ItemStackListPersister extends StringType {
 
     @Override
     public Object javaToSqlArg(FieldType fieldType, Object javaObject) {
+        if(javaObject == null) return null;
+        if(!(javaObject instanceof List)) return null;
+        if(!(((List<?>) javaObject).isEmpty() || ((List<?>) javaObject).get(0) instanceof ItemStack)) return null;
         List<ItemStack> list = (List<ItemStack>) javaObject;
-        if (list == null) return null;
 
         ListTag nbtList = new ListTag();
         for (ItemStack stack : list) {

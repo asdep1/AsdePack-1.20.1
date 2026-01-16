@@ -1,10 +1,7 @@
 package fr.asdepack.common.network;
 
 import fr.asdepack.Asdepack;
-import fr.asdepack.common.network.packets.CSyncKitStorage;
-import fr.asdepack.common.network.packets.CSyncRegion;
-import fr.asdepack.common.network.packets.SRequestKitPacket;
-import fr.asdepack.common.network.packets.STestPacket;
+import fr.asdepack.common.network.packets.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
@@ -42,6 +39,18 @@ public class PacketHelper {
                 .encoder(CSyncRegion::encode)
                 .decoder(CSyncRegion::new)
                 .consumerMainThread(CSyncRegion::handle)
+                .add();
+
+        INSTANCE.messageBuilder(SPacketTransmitPacket.class, 5)
+                .encoder(SPacketTransmitPacket::encode)
+                .decoder(SPacketTransmitPacket::new)
+                .consumerMainThread(SPacketTransmitPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(SPacketChangeRadioFreq.class, 6)
+                .encoder(SPacketChangeRadioFreq::encode)
+                .decoder(SPacketChangeRadioFreq::new)
+                .consumerMainThread(SPacketChangeRadioFreq::handle)
                 .add();
     }
 

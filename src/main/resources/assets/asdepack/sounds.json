@@ -1,0 +1,10 @@
+{
+  "radio_stop": {
+    "subtitle": "asdepack.subtitle.radio_stop",
+    "sounds": [ "asdepack:radio_stop" ]
+  },
+  "radio_start": {
+    "subtitle": "asdepack.subtitle.radio_start",
+    "sounds": [ "asdepack:radio_start" ]
+  }
+}
