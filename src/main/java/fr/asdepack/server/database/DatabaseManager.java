@@ -5,11 +5,13 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import fr.asdepack.server.modules.kits.KitManager;
 import fr.asdepack.server.Server;
+import fr.asdepack.server.modules.kits.KitManager;
 import fr.asdepack.server.modules.scrap.ScrapManager;
+import fr.asdepack.server.modules.stash.StashManager;
 import fr.asdepack.types.Kit;
 import fr.asdepack.types.Scrap;
+import fr.asdepack.types.Stash;
 import lombok.Getter;
 
 import java.sql.SQLException;
@@ -24,6 +26,9 @@ public class DatabaseManager {
     @Getter
     private ScrapManager scrapManager;
 
+    @Getter
+    private final StashManager stashManager;
+
     public DatabaseManager(String databasePath) throws SQLException {
         Server.getLogger().log(new LogRecord(Level.INFO, "Connecting to database at " + databasePath));
         String databaseUrl = "jdbc:sqlite:" + databasePath;
@@ -35,6 +40,9 @@ public class DatabaseManager {
 
         this.scrapManager = new ScrapManager(DaoManager.createDao(connectionSource, Scrap.class));
         TableUtils.createTableIfNotExists(connectionSource, Scrap.class);
+
+        this.stashManager = new StashManager(DaoManager.createDao(connectionSource, Stash.class));
+        TableUtils.createTableIfNotExists(connectionSource, Stash.class);
 
     }
 }

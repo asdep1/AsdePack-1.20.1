@@ -12,15 +12,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StashMenu extends BorderedMenu {
+public class AdminStashMenu extends BorderedMenu {
 
     private final StashManager stashManager;
+    private final String uuid;
 
-    public StashMenu(int id, Inventory playerInv, Player player) {
+    public AdminStashMenu(int id, Inventory playerInv, Player player, String uuid) {
         super(id, playerInv, player, new int[]{}, USEABLE_SLOTS);
         this.stashManager = Server.getDatabaseManager().getStashManager();
+        this.uuid = uuid;
 
-        Stash stash = stashManager.getStashByUUID(player.getUUID().toString());
+        Stash stash = stashManager.getStashByUUID(uuid);
         if (stash != null) {
             List<ItemStack> stacks = stash.getItems();
             int slot = 0;
@@ -32,12 +34,10 @@ public class StashMenu extends BorderedMenu {
 
     @Override
     protected void onLeftClick(int slot, ItemStack stack) {
-
     }
 
     @Override
     protected void onRightClick(int slot, ItemStack stack) {
-
     }
 
     @Override
@@ -45,7 +45,8 @@ public class StashMenu extends BorderedMenu {
         super.clicked(slotId, dragType, clickType, player);
         if (!getSlot(slotId).mayPickup(player)) return;
 
-        Stash stash = getOrCreateStash();
+        Stash stash = stashManager.getStashByUUID(this.uuid);
+        if (stash == null) return;
         stash.setItems(collectItemsFromSlots());
 
         try {
@@ -53,15 +54,6 @@ public class StashMenu extends BorderedMenu {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private Stash getOrCreateStash() {
-        Stash stash = stashManager.getStashByUUID(player.getUUID().toString());
-        if (stash == null) {
-            stash = new Stash();
-            stash.setPlayeruuid(player.getUUID().toString());
-        }
-        return stash;
     }
 
     private List<ItemStack> collectItemsFromSlots() {
@@ -74,6 +66,5 @@ public class StashMenu extends BorderedMenu {
 
     @Override
     protected void onMenuClosed(Player player) {
-
     }
 }
