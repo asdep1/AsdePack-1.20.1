@@ -8,10 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
@@ -32,14 +33,22 @@ public class Scrap {
     @Setter
     private List<ItemStack> scraps;
 
-    public static ItemStack compatTacz(ItemStack stack) {  //permit tacz item to correctly be get for the scrap system
+    public static ItemStack compatTacz(ItemStack stack) throws Exception {  //permit tacz item to correctly be get for the scrap system
         ResourceLocation itemId = stack.getItem().builtInRegistryHolder().key().location();
 
         if (!itemId.getNamespace().equals("tacz")) {
             stack.setCount(1);
             return stack;
         }
-        ItemStack tacz = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())));
+        ResourceLocation relatedResourceLocation = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        if(relatedResourceLocation == null) {
+            throw new Exception("ResourceLocation is null");
+        }
+        Item relatedItem = ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(relatedResourceLocation.toString()));
+        if(relatedItem == null) {
+            throw new Exception("Related item is null");
+        }
+        ItemStack tacz = new ItemStack(relatedItem, 1);
         CompoundTag key = stack.getOrCreateTag();
         // TACZ compat
         String[] taczKeys = {"GunId", "AttachmentId", "AmmoId", "BlockId"};

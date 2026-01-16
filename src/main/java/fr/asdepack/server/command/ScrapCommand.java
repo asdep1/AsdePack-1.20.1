@@ -86,6 +86,8 @@ public class ScrapCommand {
         } catch (SQLException e) {
             player.sendSystemMessage(Component.literal("Erreur lors de l'ajout de l'item : " + e.getMessage()));
             return 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return 1;
     }

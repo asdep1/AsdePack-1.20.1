@@ -59,7 +59,7 @@ public class ScrappingMenu extends BorderedMenu {
 
 
     @Override
-    protected void onLeftClick(int slot, ItemStack stack) {
+    protected void onLeftClick(int slot, ItemStack stack) throws Exception {
         if (slot == 49) {
             computeScrapFromItems();
             for (ItemStack resultStack : scrappedResults) {
@@ -80,7 +80,7 @@ public class ScrappingMenu extends BorderedMenu {
     protected void onRightClick(int slot, ItemStack stack) {
     }
 
-    public void computeScrapFromItems() {
+    public void computeScrapFromItems() throws Exception {
         Map<String, ItemStack> resultsMap = new HashMap<>();
         List<ItemStack> itemsToProcess = new ArrayList<>(selectedItems);
         for (ItemStack input : itemsToProcess) {

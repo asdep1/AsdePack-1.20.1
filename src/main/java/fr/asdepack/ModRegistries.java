@@ -1,7 +1,9 @@
 package fr.asdepack;
 
 import fr.asdepack.common.capabilities.playerkit.IPlayerKitStorage;
+import fr.asdepack.common.capabilities.radios.IPlayerRadioStorage;
 import fr.asdepack.common.menus.KitPreviewMenu;
+import fr.asdepack.common.menus.RadioConfigMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -19,6 +21,9 @@ public class ModRegistries {
     public static final RegistryObject<MenuType<KitPreviewMenu>> KIT_PREVIEW =
             MENU_TYPES.register("kit_preview", () -> KitPreviewMenu.TYPE);
 
+    public static final RegistryObject<MenuType<RadioConfigMenu>> RADIO_CONFIG =
+            MENU_TYPES.register("radio_config", () -> RadioConfigMenu.TYPE);
+
     public static void register(IEventBus eventBus) {
         MENU_TYPES.register(eventBus);
     }
@@ -26,5 +31,6 @@ public class ModRegistries {
     @SubscribeEvent
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.register(IPlayerKitStorage.class);
+        event.register(IPlayerRadioStorage.class);
     }
 }

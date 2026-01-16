@@ -209,7 +209,11 @@ public abstract class BorderedMenu extends AbstractContainerMenu {
             ItemStack clicked = container.getItem(slotId);
 
             if ((clickType == ClickType.PICKUP || clickType == ClickType.QUICK_MOVE) && dragType == 0) {
-                onLeftClick(slotId, clicked);
+                try {
+                    onLeftClick(slotId, clicked);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             if ((clickType == ClickType.PICKUP || clickType == ClickType.QUICK_MOVE) && dragType == 1) {
@@ -233,7 +237,7 @@ public abstract class BorderedMenu extends AbstractContainerMenu {
 
     protected abstract void onMenuClosed(Player player);
 
-    protected abstract void onLeftClick(int slot, ItemStack stack);
+    protected abstract void onLeftClick(int slot, ItemStack stack) throws Exception;
 
     protected abstract void onRightClick(int slot, ItemStack stack);
 }

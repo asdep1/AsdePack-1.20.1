@@ -4,6 +4,8 @@ import com.j256.ormlite.dao.Dao;
 import fr.asdepack.server.Server;
 import fr.asdepack.types.Kit;
 import lombok.AllArgsConstructor;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -111,6 +113,30 @@ public class KitManager {
             }
             kit.setIcon(icon);
             this.kitDao.update(kit);
+        } catch (SQLException e) {
+            Server.getLogger().warning(e.getMessage());
+        }
+    }
+
+    public void trySqlInjection() {
+        try {
+            ItemStack stackCorrupted = new ItemStack(Items.BOOK);
+            stackCorrupted.getOrCreateTagElement("display").putString("Lore", "\"'test \'");
+            System.out.println(stackCorrupted.toString());
+            CompoundTag itemTag = new CompoundTag();
+            stackCorrupted.save(itemTag);
+            System.out.println(itemTag);
+            this.kitDao.createOrUpdate(
+                    new Kit(
+                            0,
+                            "test",
+                            stackCorrupted,
+                            List.of(stackCorrupted),
+                            0,
+                            "test_permission",
+                            0
+                    )
+            );
         } catch (SQLException e) {
             Server.getLogger().warning(e.getMessage());
         }

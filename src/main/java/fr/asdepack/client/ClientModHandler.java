@@ -4,7 +4,9 @@ import fr.asdepack.Asdepack;
 import fr.asdepack.common.capabilities.playerkit.IPlayerKitStorage;
 import fr.asdepack.common.capabilities.playerkit.PlayerKitStorage;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.model.obj.ObjLoader;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
@@ -21,4 +23,9 @@ public class ClientModHandler {
         LOGGER.info("Registering Keys");
         event.register(Keybindings.INSTANCE.demoKeybind);
     }
+
+//    @SubscribeEvent
+//    public static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
+//        event.register("obj", ObjLoader.INSTANCE);
+//    }
 }
