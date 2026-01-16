@@ -2,6 +2,8 @@ package fr.asdepack.common.menus;
 
 import com.corrinedev.gundurability.config.Config;
 import fr.asdepack.helpers.ItemKeyUtil;
+import fr.asdepack.server.Server;
+import fr.asdepack.types.Scrap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -36,8 +38,9 @@ public class ScrappingMenu extends BorderedMenu {
         double max;
 
         if (stack.getOrCreateTag().contains("Durability")) {
-            double durability = stack.getOrCreateTag().getInt("Durability");
-            max = Config.getDurability(stack.getOrCreateTag().getString("GunId"));
+            var tag = stack.getOrCreateTag();
+            double durability = tag.getInt("Durability");
+            max = Config.getDurability(tag.getString("GunId"));
 
             if (max <= 0) return 1.0f;
 
@@ -79,19 +82,23 @@ public class ScrappingMenu extends BorderedMenu {
 
     public void computeScrapFromItems() {
         Map<String, ItemStack> resultsMap = new HashMap<>();
-        List<ItemStack> itemsToProcess = selectedItems.stream().toList();
+        List<ItemStack> itemsToProcess = new ArrayList<>(selectedItems);
         for (ItemStack input : itemsToProcess) {
             if (input.isEmpty()) continue;
 
-//            if (!Asdepack.SCRAP_MANAGER.hasScrap(input)) continue;
+            ItemStack compatInput = Scrap.compatTacz(input.copy());
+            Scrap scrapData = Server.getDatabaseManager().getScrapManager().getScrapByItem(compatInput);
+
+            if (scrapData.getScraps() == null) {
+                continue;
+            }
 
             float ratio = getDamageRatio(input);
             if (ratio <= 0f) continue;
 
             int inputCount = input.getCount();
 
-//            List<ItemStack> scraps = Asdepack.SCRAP_MANAGER.getScrapFor(input);
-            List<ItemStack> scraps = new ArrayList<>();
+            List<ItemStack> scraps = scrapData.getScraps();
             for (ItemStack scrap : scraps) {
                 int amount = Math.max(1, Math.round(scrap.getCount() * inputCount * ratio));
 

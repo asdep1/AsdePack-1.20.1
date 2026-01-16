@@ -32,33 +32,25 @@ public class Scrap {
     @Setter
     private List<ItemStack> scraps;
 
-    public static ItemStack compatTacz(ItemStack stack) {
+    public static ItemStack compatTacz(ItemStack stack) {  //permit tacz item to correctly be get for the scrap system
+        ResourceLocation itemId = stack.getItem().builtInRegistryHolder().key().location();
+
+        if (!itemId.getNamespace().equals("tacz")) {
+            stack.setCount(1);
+            return stack;
+        }
         ItemStack tacz = new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.parse(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())));
         CompoundTag key = stack.getOrCreateTag();
         // TACZ compat
-        if (key.contains("gunId")) {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("GunId", key.getString("gunId"));
-            tacz.setTag(tag);
-        }
-        if (key.contains("attachmentId")) {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("AttachmentId", key.getString("attachmentId"));
-            tacz.setTag(tag);
-        }
-        if (key.contains("ammoId")) {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("AmmoId", key.getString("ammoId"));
-            tacz.setTag(tag);
-        }
-        if (key.contains("blockId")) {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("BlockId", key.getString("blockId"));
-            tacz.setTag(tag);
-        }
-        if (tacz == null || tacz == ItemStack.EMPTY) {
-            System.out.println("NNNNNNNNN");
-            return ItemStack.EMPTY;
+        String[] taczKeys = {"GunId", "AttachmentId", "AmmoId", "BlockId"};
+        for (String taczKey : taczKeys) {
+            if (key.contains(taczKey)) {
+                CompoundTag tag = new CompoundTag();
+                tag.putString(taczKey, key.getString(taczKey));
+                tag.putBoolean("taczitemtoscrap", true);
+                tacz.setTag(tag);
+                break;
+            }
         }
         return tacz;
     }
